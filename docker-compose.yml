@@ -2,11 +2,10 @@ services:
   frontend:
     build: ./frontend
     ports:
-      - "80:80"
+      - "3036:80"
     depends_on:
       - backend
 
   backend:
     build: ./backend
-    ports:
-      - "8000:8000"
+    # Pas exposé sur l'hôte : nginx y accède via le réseau Docker (port 8000)

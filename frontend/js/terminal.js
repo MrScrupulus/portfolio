@@ -3,8 +3,10 @@
 
   const API_BASE = "/api";
 
-  const PROMPT = "emile@portfolio:~$";
-  const THEMES = ["default", "matrix", "amber", "blue"];
+  function getPrompt() {
+    return "emile-portfolio@localhost:~$";
+  }
+  const THEMES = ["matrix", "amber", "blue"];
   const ALIASES = { a: "about", p: "projects", h: "help", c: "contact", s: "skills", cl: "clear", t: "theme", e: "exit", "?": "help" };
 
   const COMMANDS = {
@@ -14,7 +16,7 @@
     skills: { args: "", desc: "Compétences" },
     contact: { args: "", desc: "Me contacter" },
     clear: { args: "", desc: "Effacer l'écran" },
-    theme: { args: "", desc: "Changer le thème" },
+    theme: { args: "[matrix|amber|blue]", desc: "Changer le thème (matrix, amber, blue)" },
     exit: { args: "", desc: "Fermer le terminal" },
     history: { args: "", desc: "Historique des commandes" },
     ls: { args: "", desc: "Lister les répertoires" },
@@ -38,13 +40,12 @@
     boot: document.getElementById("boot-output"),
     history: document.getElementById("history"),
     input: document.getElementById("input"),
-    cursor: document.getElementById("cursor"),
   };
 
   function promptSpan() {
     const s = document.createElement("span");
     s.className = "prompt";
-    s.textContent = PROMPT + " ";
+    s.textContent = getPrompt() + " ";
     return s;
   }
 
@@ -53,7 +54,7 @@
     wrap.className = "line";
     wrap.appendChild(promptSpan());
     const text = document.createElement("span");
-    text.className = isCommand ? "cmd-line" : "output-block";
+    text.className = isCommand ? "cmd-entered" : "output-block";
     text.textContent = cmd;
     wrap.appendChild(text);
     el.history.appendChild(wrap);
@@ -91,10 +92,10 @@
   function runHelp() {
     let out = "Commandes disponibles:\n\n";
     Object.entries(COMMANDS).forEach(([name, { args, desc }]) => {
-      out += `  ${name} ${args}\n    ${desc}\n\n`;
+      out += `  ${name} ${args}\n    ${desc}\n`;
     });
-    out += "Alias: a=about, p=projects, h=help, c=contact, s=skills, cl=clear, t=theme, e=exit";
-    appendBlock(out);
+    out += "\nAlias: a=about, p=projects, h=help, c=contact, s=skills, cl=clear, t=theme, e=exit";
+    appendBlock(out, "output-block help-output");
   }
 
   function runAbout() {
@@ -154,10 +155,20 @@
     el.history.innerHTML = "";
   }
 
-  function runTheme() {
+  function runTheme(arg) {
+    var name = (arg || "").trim().toLowerCase();
+    if (name) {
+      var idx = THEMES.indexOf(name);
+      if (idx !== -1) {
+        themeIndex = idx;
+        document.documentElement.setAttribute("data-theme", THEMES[themeIndex]);
+        appendBlock("Thème: " + THEMES[themeIndex] + ".");
+        return;
+      }
+    }
     themeIndex = (themeIndex + 1) % THEMES.length;
     document.documentElement.setAttribute("data-theme", THEMES[themeIndex] || "");
-    appendBlock(`Thème: ${THEMES[themeIndex]}. Rechargez 'theme' pour changer.`);
+    appendBlock("Thème: " + THEMES[themeIndex] + ". Ou tapez 'theme matrix', 'theme amber', 'theme blue'.");
   }
 
   function runExit() {
@@ -220,7 +231,7 @@
   }
 
   function execute(input) {
-    const trimmed = input.trim();
+    const trimmed = (input || "").trim();
     if (!trimmed) return;
 
     history.push(trimmed);
@@ -229,8 +240,6 @@
     const parts = trimmed.split(/\s+/);
     const cmd = normalizeCmd(parts[0]);
     const arg = parts.slice(1).join(" ");
-
-    appendLine(trimmed, true);
 
     switch (cmd) {
       case "help":
@@ -253,7 +262,7 @@
         runClear();
         break;
       case "theme":
-        runTheme();
+        runTheme(arg);
         break;
       case "exit":
         runExit();
@@ -279,7 +288,7 @@
 
   function addInputLine() {
     const line = document.createElement("div");
-    line.className = "line";
+    line.className = "line input-line";
     line.appendChild(promptSpan());
     const inp = document.createElement("input");
     inp.type = "text";
@@ -287,28 +296,34 @@
     inp.autocomplete = "off";
     inp.spellcheck = false;
     inp.setAttribute("aria-label", "Commande");
-    const cur = document.createElement("span");
-    cur.className = "cursor";
-    cur.textContent = "█";
     line.appendChild(inp);
-    line.appendChild(cur);
     el.history.appendChild(line);
     inp.focus();
     inp.addEventListener("keydown", (e) => handleKey(e, inp, line));
     return inp;
   }
 
+  function commitLineAndRun(inputEl, val) {
+    var cmd = (val || "").trim();
+    if (!cmd) return;
+    // Ajouter la ligne "prompt + commande" dans #history (en haut), pas en modifiant la ligne de saisie
+    var lineWrap = document.createElement("div");
+    lineWrap.className = "line";
+    lineWrap.appendChild(promptSpan());
+    var cmdSpan = document.createElement("span");
+    cmdSpan.className = "cmd-entered";
+    cmdSpan.textContent = cmd;
+    lineWrap.appendChild(cmdSpan);
+    el.history.appendChild(lineWrap);
+    execute(val);
+    inputEl.value = "";
+    inputEl.focus();
+  }
+
   function handleKey(e, inputEl, lineEl) {
     if (e.key === "Enter") {
       e.preventDefault();
-      const val = inputEl.value;
-      inputEl.disabled = true;
-      inputEl.classList.add("hidden");
-      const cursor = lineEl.querySelector(".cursor");
-      if (cursor) cursor.classList.add("hidden");
-      execute(val);
-      const next = addInputLine();
-      next.focus();
+      commitLineAndRun(inputEl, inputEl.value);
     } else if (e.key === "Tab") {
       e.preventDefault();
       autocomplete(inputEl);
@@ -358,14 +373,33 @@
   }
 
   function init() {
+    document.documentElement.setAttribute("data-theme", THEMES[themeIndex] || "matrix");
+    var initialPromptEl = document.getElementById("initial-prompt");
+    if (initialPromptEl) initialPromptEl.textContent = getPrompt() + " ";
+    var loader = document.getElementById("loader");
+    var loaderPercent = loader ? loader.querySelector(".loader-percent") : null;
+    if (loader) {
+      var start = Date.now();
+      var duration = 2000;
+      var tick = function () {
+        var elapsed = Date.now() - start;
+        if (loaderPercent) loaderPercent.textContent = Math.min(100, Math.floor((elapsed / duration) * 100)) + "%";
+        if (elapsed < duration) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      setTimeout(function () {
+        if (loaderPercent) loaderPercent.textContent = "100%";
+        loader.classList.add("loaded");
+        setTimeout(function () {
+          loader.remove();
+        }, 550);
+      }, 2500);
+    }
     runBoot();
-    document.documentElement.setAttribute("data-theme", THEMES[themeIndex] || "");
     el.input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        const val = el.input.value;
-        el.input.value = "";
-        execute(val);
+        commitLineAndRun(el.input, el.input.value);
       } else if (e.key === "Tab") {
         e.preventDefault();
         autocomplete(el.input);

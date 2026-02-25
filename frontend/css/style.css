@@ -1,10 +1,10 @@
+/* Variables par thème */
 :root {
-  --bg: #0d1117;
-  --fg: #e6edf3;
-  --accent: #58a6ff;
-  --success: #3fb950;
-  --dim: #8b949e;
-  --error: #f85149;
+  --bg: #0a0e0a;
+  --fg: #00ff41;
+  --accent: #00ff41;
+  --dim: #003300;
+  --error: #ff5555;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
 }
 
@@ -44,6 +44,16 @@ html, body {
   line-height: 1.5;
 }
 
+html[data-theme="matrix"] body,
+html[data-theme="matrix"] #terminal,
+html[data-theme="matrix"] .prompt,
+html[data-theme="matrix"] .cmd-line,
+html[data-theme="matrix"] .output-block,
+html[data-theme="matrix"] .cmd-line::before,
+html[data-theme="matrix"] .cmd-entered {
+  color: #00ff41;
+}
+
 #terminal {
   min-height: 100%;
   padding: 1.5rem 1.5rem 2rem;
@@ -65,7 +75,23 @@ html, body {
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.25rem;
-  margin: 0.25rem 0;
+  margin: 0.4rem 0;
+}
+
+.line.input-line {
+  background: var(--bg);
+}
+
+.input-wrapper {
+  display: flex;
+  flex: 1;
+  min-width: 120px;
+  align-items: center;
+}
+
+.input-wrapper #input {
+  flex: 1;
+  min-width: 0;
 }
 
 .prompt {
@@ -76,25 +102,42 @@ html, body {
 #input {
   flex: 1;
   min-width: 120px;
-  background: transparent;
+  background: var(--bg);
+  background-color: var(--bg);
   border: none;
+  border-radius: 0;
   color: var(--fg);
   font: inherit;
   outline: none;
-  caret-color: transparent;
+  caret-color: var(--accent);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  box-shadow: none;
+}
+
+/* Curseur natif visible : couleur explicite par thème (certains navigateurs ignorent var() sur caret-color) */
+html[data-theme="matrix"] #input {
+  caret-color: #00ff41;
+}
+html[data-theme="amber"] #input {
+  caret-color: #f59e0b;
+}
+html[data-theme="blue"] #input {
+  caret-color: #38bdf8;
+}
+
+#input:-webkit-autofill,
+#input:-webkit-autofill:hover,
+#input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--fg);
+  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
+  box-shadow: 0 0 0 1000px var(--bg) inset;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 #input::placeholder {
   color: var(--dim);
-}
-
-.cursor {
-  color: var(--accent);
-  animation: blink 1s step-end infinite;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
 }
 
 .cmd-line {
@@ -107,8 +150,13 @@ html, body {
   color: var(--accent);
 }
 
+.cmd-entered {
+  color: var(--fg);
+  margin-left: 0.25rem;
+}
+
 .output-block {
-  margin: 0.5rem 0 1rem;
+  margin: 0.5rem 0 1.25rem;
   white-space: pre-wrap;
   word-break: break-word;
   color: var(--fg);
@@ -138,8 +186,17 @@ html, body {
   margin-top: 0.5rem;
 }
 
+.output-block.help-output {
+  line-height: 1.2;
+  margin: 0.35rem 0 0.5rem;
+}
+
 #history .line {
-  margin: 0.15rem 0;
+  margin: 0.6rem 0;
+}
+
+#history .output-block {
+  margin: 0.5rem 0 1.25rem;
 }
 
 #boot-output {
@@ -148,4 +205,61 @@ html, body {
 
 .hidden {
   display: none;
+}
+
+/* Loader */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  transition: opacity 0.5s ease-out;
+}
+
+#loader.loaded {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-terminal {
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.loader-terminal .loader-text {
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.loader-bar-wrap {
+  width: 280px;
+  height: 20px;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  overflow: hidden;
+  display: flex;
+}
+
+.loader-bar {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  animation: loader-fill 2s ease-out forwards;
+}
+
+@keyframes loader-fill {
+  to { width: 100%; }
+}
+
+.loader-percent {
+  font-size: 12px;
+  color: var(--dim);
 }
