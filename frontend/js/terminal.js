@@ -196,7 +196,7 @@
   function runContact() {
     const html = `
   Email : <a href="mailto:emile.deballon@gmail.com">emile.deballon@gmail.com</a><br>
-  GitHub : <a href="https://www.linkedin.com/in/emile-deballon-738a432b4/" target="_blank" rel="noopener">github.com/emile</a><br>
+  GitHub : <a href="https://github.com/MrScrupulus" target="_blank" rel="noopener">github.com/MrScrupulus</a><br>
   LinkedIn : <a href="https://www.linkedin.com/in/emile-deballon-738a432b4/" target="_blank" rel="noopener">linkedin.com/in/emile</a>
 `;
     const block = appendBlock("", "output-block");
