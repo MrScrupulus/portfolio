@@ -1,0 +1,151 @@
+:root {
+  --bg: #0d1117;
+  --fg: #e6edf3;
+  --accent: #58a6ff;
+  --success: #3fb950;
+  --dim: #8b949e;
+  --error: #f85149;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+[data-theme="matrix"] {
+  --bg: #0a0e0a;
+  --fg: #00ff41;
+  --accent: #00ff41;
+  --dim: #003300;
+}
+
+[data-theme="amber"] {
+  --bg: #1c1917;
+  --fg: #fbbf24;
+  --accent: #f59e0b;
+  --dim: #78716c;
+}
+
+[data-theme="blue"] {
+  --bg: #0f172a;
+  --fg: #94a3b8;
+  --accent: #38bdf8;
+  --dim: #475569;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+#terminal {
+  min-height: 100%;
+  padding: 1.5rem 1.5rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#output {
+  outline: none;
+}
+
+#line-boot {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 0.25rem 0;
+}
+
+.prompt {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+#input {
+  flex: 1;
+  min-width: 120px;
+  background: transparent;
+  border: none;
+  color: var(--fg);
+  font: inherit;
+  outline: none;
+  caret-color: transparent;
+}
+
+#input::placeholder {
+  color: var(--dim);
+}
+
+.cursor {
+  color: var(--accent);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.cmd-line {
+  color: var(--dim);
+  margin-left: 0.25rem;
+}
+
+.cmd-line::before {
+  content: "> ";
+  color: var(--accent);
+}
+
+.output-block {
+  margin: 0.5rem 0 1rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--fg);
+}
+
+.output-block a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.output-block a:hover {
+  text-decoration: underline;
+}
+
+.output-block .label {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.output-block .error {
+  color: var(--error);
+}
+
+.output-block .hint {
+  color: var(--dim);
+  font-size: 0.9em;
+  margin-top: 0.5rem;
+}
+
+#history .line {
+  margin: 0.15rem 0;
+}
+
+#boot-output {
+  margin-bottom: 0.5rem;
+}
+
+.hidden {
+  display: none;
+}
