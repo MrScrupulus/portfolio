@@ -10,9 +10,9 @@
 
 [data-theme="matrix"] {
   --bg: #0a0e0a;
-  --fg: #00ff41;
+  --fg: #00cc33;
   --accent: #00ff41;
-  --dim: #003300;
+  --dim: #004d1a;
 }
 
 [data-theme="amber"] {
@@ -36,7 +36,8 @@
 html, body {
   margin: 0;
   padding: 0;
-  height: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font-mono);
@@ -44,24 +45,44 @@ html, body {
   line-height: 1.5;
 }
 
-html[data-theme="matrix"] body,
-html[data-theme="matrix"] #terminal,
-html[data-theme="matrix"] .prompt,
-html[data-theme="matrix"] .cmd-line,
-html[data-theme="matrix"] .output-block,
-html[data-theme="matrix"] .cmd-line::before,
-html[data-theme="matrix"] .cmd-entered {
-  color: #00ff41;
+body {
+  display: flex;
+  flex-direction: column;
 }
 
 #terminal {
-  min-height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+html[data-theme="matrix"] body,
+html[data-theme="matrix"] #terminal,
+html[data-theme="matrix"] .output-block,
+html[data-theme="matrix"] .cmd-entered {
+  color: var(--fg);
+}
+html[data-theme="matrix"] .prompt,
+html[data-theme="matrix"] .cmd-line::before {
+  color: var(--accent);
+}
+html[data-theme="matrix"] .cmd-line {
+  color: var(--dim);
+}
+
+#terminal {
   padding: 1.5rem 1.5rem 2rem;
   max-width: 800px;
   margin: 0 auto;
+  width: 100%;
 }
 
 #output {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   outline: none;
 }
 
@@ -83,61 +104,62 @@ html[data-theme="matrix"] .cmd-entered {
 }
 
 .input-wrapper {
+  position: relative;
   display: flex;
   flex: 1;
   min-width: 120px;
   align-items: center;
 }
 
-.input-wrapper #input {
+.input-area {
   flex: 1;
   min-width: 0;
+  min-height: 1.2em;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  outline: none;
+  caret-color: transparent;
+  white-space: pre;
+  word-break: break-all;
+}
+
+.input-area:empty::before {
+  content: attr(data-placeholder);
+  color: var(--dim);
+}
+
+/* Curseur bloc type terminal : position dynamique (--cursor-x, --cursor-y en JS) */
+.cursor {
+  position: absolute;
+  left: var(--cursor-x, 0);
+  top: var(--cursor-y, 0);
+  width: 1ch;
+  height: 1.2em;
+  background: var(--accent);
+  pointer-events: none;
+  animation: cursor-blink 0.8s steps(1) infinite;
+}
+
+/* Mobile : curseur natif + champ de saisie bien visible (viewport étroit uniquement) */
+@media (max-width: 768px) {
+  .input-wrapper .cursor {
+    display: none;
+  }
+  .input-area {
+    caret-color: var(--accent);
+    min-height: 1.5em;
+    padding: 0.25em 0;
+  }
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
 }
 
 .prompt {
   color: var(--accent);
   flex-shrink: 0;
-}
-
-#input {
-  flex: 1;
-  min-width: 120px;
-  background: var(--bg);
-  background-color: var(--bg);
-  border: none;
-  border-radius: 0;
-  color: var(--fg);
-  font: inherit;
-  outline: none;
-  caret-color: var(--accent);
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  box-shadow: none;
-}
-
-/* Curseur natif visible : couleur explicite par thème (certains navigateurs ignorent var() sur caret-color) */
-html[data-theme="matrix"] #input {
-  caret-color: #00ff41;
-}
-html[data-theme="amber"] #input {
-  caret-color: #f59e0b;
-}
-html[data-theme="blue"] #input {
-  caret-color: #38bdf8;
-}
-
-#input:-webkit-autofill,
-#input:-webkit-autofill:hover,
-#input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--fg);
-  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
-  box-shadow: 0 0 0 1000px var(--bg) inset;
-  transition: background-color 5000s ease-in-out 0s;
-}
-
-#input::placeholder {
-  color: var(--dim);
 }
 
 .cmd-line {
@@ -218,12 +240,13 @@ html[data-theme="blue"] #input {
   align-items: center;
   justify-content: center;
   gap: 1.5rem;
-  transition: opacity 0.5s ease-out;
+  transition: opacity 0.3s ease-out;
 }
 
 #loader.loaded {
   opacity: 0;
   pointer-events: none;
+  transition: opacity 0.25s ease-out;
 }
 
 .loader-terminal {
@@ -252,7 +275,7 @@ html[data-theme="blue"] #input {
   height: 100%;
   width: 0;
   background: var(--accent);
-  animation: loader-fill 2s ease-out forwards;
+  animation: loader-fill 1s ease-out forwards;
 }
 
 @keyframes loader-fill {
@@ -262,4 +285,40 @@ html[data-theme="blue"] #input {
 .loader-percent {
   font-size: 12px;
   color: var(--dim);
+}
+
+/* Footer : toujours en bas de l'écran, couleurs du thème */
+.terminal-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--dim);
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.footer-icon {
+  color: var(--accent);
+  opacity: 0.9;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.footer-icon:hover {
+  opacity: 1;
+  color: var(--fg);
+}
+
+.footer-icon svg {
+  display: block;
+}
+
+.footer-copyright {
+  margin: 0;
+  font-size: 0.90rem;
+  color: var(--fg);
 }

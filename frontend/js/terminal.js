@@ -28,7 +28,7 @@
 
   const BOOT_LINES = [
     "Portfolio Terminal v1.0",
-    "Tapez 'help' ou '?' pour les commandes.",
+    "Tapez 'help' ou '?' pour afficher les commandes.",
     "",
   ];
 
@@ -39,8 +39,61 @@
   const el = {
     boot: document.getElementById("boot-output"),
     history: document.getElementById("history"),
-    input: document.getElementById("input"),
+    inputArea: document.getElementById("input-area"),
+    inputWrapper: document.getElementById("input-wrapper"),
   };
+
+  function getInputValue() {
+    return (el.inputArea && el.inputArea.textContent) ? el.inputArea.textContent.trim() : "";
+  }
+
+  function setInputValue(val) {
+    if (!el.inputArea) return;
+    el.inputArea.textContent = val || "";
+    placeCaretAtEnd(el.inputArea);
+    requestAnimationFrame(updateCursor);
+  }
+
+  function placeCaretAtEnd(node) {
+    if (!node) return;
+    var range = document.createRange();
+    var sel = window.getSelection();
+    range.selectNodeContents(node);
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  function updateCursor() {
+    if (!el.inputArea || !el.inputWrapper) return;
+    var wrapperRect = el.inputWrapper.getBoundingClientRect();
+    var areaRect = el.inputArea.getBoundingClientRect();
+    var x = 0, y = 0;
+    var isEmpty = !el.inputArea.textContent || el.inputArea.textContent.length === 0;
+    if (isEmpty) {
+      x = areaRect.left - wrapperRect.left;
+      y = areaRect.top - wrapperRect.top;
+    } else {
+      var sel = window.getSelection();
+      if (sel.rangeCount) {
+        var range = sel.getRangeAt(0);
+        if (el.inputArea.contains(range.startContainer)) {
+          var rangeClone = range.cloneRange();
+          rangeClone.collapse(true);
+          var rect = rangeClone.getBoundingClientRect();
+          if (rect.width > 0 || rect.height > 0) {
+            x = rect.left - wrapperRect.left;
+            y = rect.top - wrapperRect.top;
+          } else {
+            x = areaRect.left - wrapperRect.left;
+            y = areaRect.top - wrapperRect.top;
+          }
+        }
+      }
+    }
+    el.inputWrapper.style.setProperty("--cursor-x", x + "px");
+    el.inputWrapper.style.setProperty("--cursor-y", y + "px");
+  }
 
   function promptSpan() {
     const s = document.createElement("span");
@@ -142,10 +195,9 @@
 
   function runContact() {
     const html = `
-  Email : <a href="mailto:emile@example.com">emile@example.com</a><br>
-  GitHub : <a href="https://github.com/emile" target="_blank" rel="noopener">github.com/emile</a><br>
-  LinkedIn : <a href="https://linkedin.com/in/emile" target="_blank" rel="noopener">linkedin.com/in/emile</a>
-  <span class="hint">(Remplacez par vos vrais liens.)</span>
+  Email : <a href="mailto:emile.deballon@gmail.com">emile.deballon@gmail.com</a><br>
+  GitHub : <a href="https://www.linkedin.com/in/emile-deballon-738a432b4/" target="_blank" rel="noopener">github.com/emile</a><br>
+  LinkedIn : <a href="https://www.linkedin.com/in/emile-deballon-738a432b4/" target="_blank" rel="noopener">linkedin.com/in/emile</a>
 `;
     const block = appendBlock("", "output-block");
     block.innerHTML = html;
@@ -286,27 +338,10 @@
     scrollBottom();
   }
 
-  function addInputLine() {
-    const line = document.createElement("div");
-    line.className = "line input-line";
-    line.appendChild(promptSpan());
-    const inp = document.createElement("input");
-    inp.type = "text";
-    inp.className = "input";
-    inp.autocomplete = "off";
-    inp.spellcheck = false;
-    inp.setAttribute("aria-label", "Commande");
-    line.appendChild(inp);
-    el.history.appendChild(line);
-    inp.focus();
-    inp.addEventListener("keydown", (e) => handleKey(e, inp, line));
-    return inp;
-  }
 
-  function commitLineAndRun(inputEl, val) {
+  function commitLineAndRun(val) {
     var cmd = (val || "").trim();
     if (!cmd) return;
-    // Ajouter la ligne "prompt + commande" dans #history (en haut), pas en modifiant la ligne de saisie
     var lineWrap = document.createElement("div");
     lineWrap.className = "line";
     lineWrap.appendChild(promptSpan());
@@ -316,58 +351,58 @@
     lineWrap.appendChild(cmdSpan);
     el.history.appendChild(lineWrap);
     execute(val);
-    inputEl.value = "";
-    inputEl.focus();
+    setInputValue("");
+    el.inputArea.focus();
   }
 
-  function handleKey(e, inputEl, lineEl) {
+  function handleKey(e) {
     if (e.key === "Enter") {
       e.preventDefault();
-      commitLineAndRun(inputEl, inputEl.value);
+      commitLineAndRun(getInputValue());
     } else if (e.key === "Tab") {
       e.preventDefault();
-      autocomplete(inputEl);
+      autocomplete();
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       if (historyIndex > 0) {
         historyIndex--;
-        inputEl.value = history[historyIndex];
+        setInputValue(history[historyIndex]);
       }
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
       if (historyIndex < history.length - 1) {
         historyIndex++;
-        inputEl.value = history[historyIndex];
+        setInputValue(history[historyIndex]);
       } else if (historyIndex === history.length - 1) {
         historyIndex = history.length;
-        inputEl.value = "";
+        setInputValue("");
       }
     }
   }
 
-  function autocomplete(inputEl) {
-    const val = inputEl.value.trim().toLowerCase();
+  function autocomplete() {
+    var val = getInputValue().toLowerCase();
     if (!val) {
-      inputEl.value = "help";
+      setInputValue("help");
       return;
     }
-    const parts = val.split(/\s+/);
-    const first = parts[0];
-    const all = [...Object.keys(COMMANDS), ...Object.keys(ALIASES)];
-    const matches = all.filter((k) => k.startsWith(first));
+    var parts = val.split(/\s+/);
+    var first = parts[0];
+    var all = [].concat(Object.keys(COMMANDS), Object.keys(ALIASES));
+    var matches = all.filter(function (k) { return k.startsWith(first); });
     if (matches.length === 1) {
       parts[0] = matches[0];
-      inputEl.value = parts.join(" ");
+      setInputValue(parts.join(" "));
     } else if (matches.length > 1) {
-      const common = matches.reduce((a, b) => {
-        let i = 0;
+      var common = matches.reduce(function (a, b) {
+        var i = 0;
         while (a[i] === b[i]) i++;
         return a.slice(0, i);
       }, matches[0]);
       if (common === first) {
         appendBlock("  " + matches.join("  "), "output-block hint");
       } else {
-        inputEl.value = common + (parts.length > 1 ? " " + parts.slice(1).join(" ") : "");
+        setInputValue(common + (parts.length > 1 ? " " + parts.slice(1).join(" ") : ""));
       }
     }
   }
@@ -380,7 +415,7 @@
     var loaderPercent = loader ? loader.querySelector(".loader-percent") : null;
     if (loader) {
       var start = Date.now();
-      var duration = 2000;
+      var duration = 1000;
       var tick = function () {
         var elapsed = Date.now() - start;
         if (loaderPercent) loaderPercent.textContent = Math.min(100, Math.floor((elapsed / duration) * 100)) + "%";
@@ -392,36 +427,48 @@
         loader.classList.add("loaded");
         setTimeout(function () {
           loader.remove();
-        }, 550);
-      }, 2500);
+        }, 280);
+      }, 1200);
     }
     runBoot();
-    el.input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
+    if (el.inputArea) {
+      el.inputArea.addEventListener("keydown", function (e) {
+        handleKey(e);
+        updateCursor();
+      });
+      el.inputArea.addEventListener("input", updateCursor);
+      el.inputArea.addEventListener("keyup", updateCursor);
+      el.inputArea.addEventListener("click", updateCursor);
+      document.addEventListener("selectionchange", function () {
+        if (el.inputArea && document.activeElement === el.inputArea) updateCursor();
+      });
+      window.addEventListener("resize", function () {
+        if (el.inputArea && document.activeElement === el.inputArea) requestAnimationFrame(updateCursor);
+      });
+      window.addEventListener("scroll", function () {
+        if (el.inputArea && document.activeElement === el.inputArea) requestAnimationFrame(updateCursor);
+      }, true);
+      el.inputArea.addEventListener("focusin", function () {
+        var self = el.inputArea;
+        setTimeout(function () { if (document.activeElement === self) updateCursor(); }, 100);
+        requestAnimationFrame(updateCursor);
+      });
+      el.inputArea.addEventListener("paste", function (e) {
         e.preventDefault();
-        commitLineAndRun(el.input, el.input.value);
-      } else if (e.key === "Tab") {
-        e.preventDefault();
-        autocomplete(el.input);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        if (historyIndex > 0) {
-          historyIndex--;
-          el.input.value = history[historyIndex];
-        }
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        if (historyIndex < history.length - 1) {
-          historyIndex++;
-          el.input.value = history[historyIndex];
-        } else if (historyIndex === history.length - 1) {
-          historyIndex = history.length;
-          el.input.value = "";
-        }
-      }
+        var text = (e.clipboardData || window.clipboardData).getData("text");
+        if (text) document.execCommand("insertText", false, text.replace(/[\r\n]+/g, " "));
+      });
+      el.inputArea.focus();
+      requestAnimationFrame(function () {
+        updateCursor();
+      });
+    }
+    document.addEventListener("click", function (e) {
+      if (!el.inputArea) return;
+      if (e.target.closest("a") || e.target.closest("button")) return;
+      el.inputArea.focus();
+      updateCursor();
     });
-    el.input.focus();
-    document.getElementById("terminal").addEventListener("click", () => el.input.focus());
   }
 
   init();
