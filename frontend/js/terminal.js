@@ -58,6 +58,7 @@
 
   const el = {
     boot: document.getElementById("boot-output"),
+    output: document.getElementById("output"),
     history: document.getElementById("history"),
     inputArea: document.getElementById("input-area"),
     inputWrapper: document.getElementById("input-wrapper"),
@@ -196,7 +197,12 @@
   }
 
   function scrollBottom() {
-    window.scrollTo(0, document.body.scrollHeight);
+    const container = el.output || document.scrollingElement || document.documentElement;
+    try {
+      container.scrollTop = container.scrollHeight;
+    } catch (_) {
+      window.scrollTo(0, document.body.scrollHeight);
+    }
   }
 
   function runBoot() {
@@ -231,16 +237,15 @@
       }
       div.id = "line-boot";
       fragment.appendChild(div);
+
+      if (line.includes("'help'") && line.includes("'?'")) {
+        const tip = document.createElement("div");
+        tip.className = "boot-tip";
+        tip.textContent = "Astuce : touchez une commande pour l’exécuter.";
+        fragment.appendChild(tip);
+      }
     });
     el.boot.appendChild(fragment);
-    // Délégation de clic sur les liens du boot
-    el.boot.addEventListener("click", function (e) {
-      const elLink = e.target && e.target.closest ? e.target.closest(".help-link") : null;
-      if (!elLink) return;
-      const cmd = elLink.dataset.cmd || "";
-      if (!cmd) return;
-      commitLineAndRun(cmd);
-    });
     scrollBottom();
   }
 
@@ -287,20 +292,17 @@
       list.appendChild(item);
     });
 
-    list.addEventListener("click", function (e) {
-      const el = e.target && e.target.closest ? e.target.closest(".help-link") : null;
-      if (!el) return;
-      const cmd = el.dataset.cmd || "";
-      if (!cmd) return;
-      commitLineAndRun(cmd);
-    });
-
     wrap.appendChild(list);
 
     const alias = document.createElement("div");
     alias.className = "help-alias";
     alias.textContent = "Alias: a=about, p=projects, h=help, c=contact, s=skills, cv=skills, portfolio=portfolio-terminal";
     wrap.appendChild(alias);
+
+    const tip = document.createElement("div");
+    tip.className = "help-tip";
+    tip.textContent = "Astuce : touchez une commande pour l’exécuter.";
+    wrap.appendChild(tip);
 
     el.history.appendChild(wrap);
   }
@@ -367,14 +369,6 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
         item.appendChild(sub);
 
         list.appendChild(item);
-      });
-
-      list.addEventListener("click", function (e) {
-        const el = e.target && e.target.closest ? e.target.closest(".help-link") : null;
-        if (!el) return;
-        const cmd = el.dataset.cmd || "";
-        if (!cmd) return;
-        commitLineAndRun(cmd);
       });
 
       wrap.appendChild(list);
@@ -841,6 +835,20 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
       }, 1200);
     }
     runBoot();
+
+    // Rendre tous les .help-link cliquables partout (boot, help, guide, projets...)
+    document.addEventListener("click", function (e) {
+      const link = e.target && e.target.closest ? e.target.closest(".help-link") : null;
+      if (!link) return;
+      // évite d'intercepter des liens/éléments interactifs
+      if (link.closest("a") || link.closest("button")) return;
+      const cmd = (link.dataset && link.dataset.cmd) ? link.dataset.cmd : (link.textContent || "").trim();
+      if (!cmd) return;
+      e.preventDefault();
+      e.stopPropagation();
+      commitLineAndRun(cmd);
+    }, true);
+
     if (el.inputArea) {
       el.inputArea.addEventListener("keydown", function (e) {
         handleKey(e);
@@ -858,10 +866,19 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
       window.addEventListener("scroll", function () {
         if (el.inputArea && document.activeElement === el.inputArea) requestAnimationFrame(updateCursor);
       }, true);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", function () {
+          if (el.inputArea && document.activeElement === el.inputArea) {
+            requestAnimationFrame(updateCursor);
+            requestAnimationFrame(scrollBottom);
+          }
+        });
+      }
       el.inputArea.addEventListener("focusin", function () {
         var self = el.inputArea;
         setTimeout(function () { if (document.activeElement === self) updateCursor(); }, 100);
         requestAnimationFrame(updateCursor);
+        requestAnimationFrame(scrollBottom);
       });
       el.inputArea.addEventListener("paste", function (e) {
         e.preventDefault();
@@ -871,6 +888,7 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
       el.inputArea.focus();
       requestAnimationFrame(function () {
         updateCursor();
+        scrollBottom();
       });
     }
     document.addEventListener("click", function (e) {

@@ -355,6 +355,11 @@ html[data-theme="matrix"] .cmd-line {
   text-decoration: underline;
 }
 
+.help-link:active {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
 .help-sub {
   color: var(--dim);
   margin-left: 2ch;
@@ -364,6 +369,12 @@ html[data-theme="matrix"] .cmd-line {
 
 .help-alias {
   margin-top: 0.7rem;
+  color: var(--dim);
+  font-size: 0.95em;
+}
+
+.help-tip {
+  margin-top: 0.55rem;
   color: var(--dim);
   font-size: 0.95em;
 }
@@ -378,6 +389,18 @@ html[data-theme="matrix"] .cmd-line {
 
 #boot-output {
   margin-bottom: 0.5rem;
+}
+
+.boot-tip {
+  display: none;
+  color: var(--dim);
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .boot-tip {
+    display: block;
+  }
 }
 
 .hidden {
