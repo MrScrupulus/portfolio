@@ -1,0 +1,479 @@
+/* Variables par thème */
+:root {
+  --bg: #0a0e0a;
+  --fg: #00ff41;
+  --accent: #00ff41;
+  --dim: #003300;
+  --error: #ff5555;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+[data-theme="matrix"] {
+  --bg: #0a0e0a;
+  --fg: #00cc33;
+  --accent: #00ff41;
+  --dim: #004d1a;
+}
+
+[data-theme="amber"] {
+  --bg: #1c1917;
+  --fg: #fbbf24;
+  --accent: #f59e0b;
+  --dim: #78716c;
+}
+
+[data-theme="blue"] {
+  --bg: #0f172a;
+  --fg: #94a3b8;
+  --accent: #38bdf8;
+  --dim: #475569;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#terminal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+html[data-theme="matrix"] body,
+html[data-theme="matrix"] #terminal,
+html[data-theme="matrix"] .output-block,
+html[data-theme="matrix"] .cmd-entered {
+  color: var(--fg);
+}
+html[data-theme="matrix"] .prompt,
+html[data-theme="matrix"] .cmd-line::before {
+  color: var(--accent);
+}
+html[data-theme="matrix"] .cmd-line {
+  color: var(--dim);
+}
+
+#terminal {
+  padding: 1.5rem 1.5rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+#output {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  outline: none;
+}
+
+#line-boot {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin: 0.4rem 0;
+}
+
+.line.input-line {
+  background: var(--bg);
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 120px;
+  align-items: center;
+}
+
+.input-area {
+  flex: 1;
+  min-width: 0;
+  min-height: 1.2em;
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  outline: none;
+  caret-color: transparent;
+  white-space: pre;
+  word-break: break-all;
+}
+
+.input-area:empty::before {
+  content: attr(data-placeholder);
+  color: var(--dim);
+}
+
+/* Curseur bloc type terminal : position dynamique (--cursor-x, --cursor-y en JS) */
+.cursor {
+  position: absolute;
+  left: var(--cursor-x, 0);
+  top: var(--cursor-y, 0);
+  width: 1ch;
+  height: 1.2em;
+  background: var(--accent);
+  pointer-events: none;
+  animation: cursor-blink 0.8s steps(1) infinite;
+}
+
+/* Mobile : curseur natif + champ de saisie bien visible (viewport étroit uniquement) */
+@media (max-width: 768px) {
+  .input-wrapper .cursor {
+    display: none;
+  }
+  .input-area {
+    caret-color: var(--accent);
+    min-height: 1.5em;
+    padding: 0.25em 0;
+  }
+}
+
+@keyframes cursor-blink {
+  50% { opacity: 0; }
+}
+
+.prompt {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.cmd-line {
+  color: var(--dim);
+  margin-left: 0.25rem;
+}
+
+.cmd-line::before {
+  content: "> ";
+  color: var(--accent);
+}
+
+.cmd-entered {
+  color: var(--fg);
+  margin-left: 0.25rem;
+}
+
+.output-block {
+  margin: 0.5rem 0 1.25rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--fg);
+}
+
+.output-block.project-output {
+  white-space: normal;
+}
+
+.project-card {
+  border: 1px solid var(--dim);
+  padding: 0.9rem 0.9rem 0.8rem;
+  margin: 0.25rem 0 1rem;
+  background: color-mix(in oklab, var(--bg) 88%, var(--accent) 12%);
+}
+
+.project-title {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.2px;
+}
+
+.project-lead {
+  margin: 0.1rem 0 0.45rem;
+  color: var(--fg);
+}
+
+.project-stack {
+  margin: 0.1rem 0 0.65rem;
+  color: var(--dim);
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--dim);
+  color: var(--fg);
+  font-size: 0.9em;
+  line-height: 1.2;
+}
+
+.project-section {
+  margin: 0.9rem 0 0.85rem;
+}
+
+.project-h {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.project-p {
+  margin: 0;
+  color: var(--fg);
+}
+
+.project-list {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.project-list li {
+  margin: 0.15rem 0;
+}
+
+.project-note {
+  margin-top: 0.4rem;
+  color: var(--dim);
+}
+
+/* CV preview (PDF embarqué) */
+.cv-preview-wrap {
+  width: 100%;
+  margin: 0.15rem 0 0.65rem;
+}
+
+.cv-preview {
+  display: block;
+  width: 100%;
+  height: 340px;
+  border: 1px solid var(--dim);
+  background: #fff;
+  border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+  .cv-preview {
+    height: 250px;
+  }
+}
+
+.qr-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.qr {
+  width: 180px;
+  max-width: 70vw;
+  height: auto;
+  border: 1px solid var(--dim);
+  background: #fff;
+}
+
+.qr-caption {
+  color: var(--fg);
+}
+
+.output-block a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.output-block a:hover {
+  text-decoration: underline;
+}
+
+.output-block .label {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.output-block .error {
+  color: var(--error);
+}
+
+.output-block .hint {
+  color: var(--dim);
+  font-size: 0.9em;
+  margin-top: 0.5rem;
+}
+
+.output-block.help-output {
+  line-height: 1.2;
+  margin: 0.35rem 0 0.5rem;
+}
+
+.help-title {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+
+.help-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.help-item {
+  display: block;
+}
+
+.help-line {
+  display: block;
+}
+
+.help-link {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.help-link:hover {
+  text-decoration: underline;
+}
+
+.help-sub {
+  color: var(--dim);
+  margin-left: 2ch;
+  margin-top: -0.05rem;
+  margin-bottom: 0;
+}
+
+.help-alias {
+  margin-top: 0.7rem;
+  color: var(--dim);
+  font-size: 0.95em;
+}
+
+#history .line {
+  margin: 0.6rem 0;
+}
+
+#history .output-block {
+  margin: 0.5rem 0 1.25rem;
+}
+
+#boot-output {
+  margin-bottom: 0.5rem;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Loader */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  transition: opacity 0.3s ease-out;
+}
+
+#loader.loaded {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease-out;
+}
+
+.loader-terminal {
+  font-family: var(--font-mono);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.loader-terminal .loader-text {
+  font-size: 14px;
+  color: var(--accent);
+}
+
+.loader-bar-wrap {
+  width: 280px;
+  height: 20px;
+  background: var(--bg);
+  border: 1px solid var(--accent);
+  overflow: hidden;
+  display: flex;
+}
+
+.loader-bar {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  animation: loader-fill 1s ease-out forwards;
+}
+
+@keyframes loader-fill {
+  to { width: 100%; }
+}
+
+.loader-percent {
+  font-size: 12px;
+  color: var(--dim);
+}
+
+/* Footer : toujours en bas de l'écran, couleurs du thème */
+.terminal-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid var(--dim);
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.footer-icon {
+  color: var(--accent);
+  opacity: 0.9;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.footer-icon:hover {
+  opacity: 1;
+  color: var(--fg);
+}
+
+.footer-icon svg {
+  display: block;
+}
+
+.footer-copyright {
+  margin: 0;
+  font-size: 0.90rem;
+  color: var(--fg);
+}
