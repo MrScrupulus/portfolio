@@ -146,6 +146,55 @@
     return wrap;
   }
 
+  function appendGuide() {
+    const wrap = document.createElement("div");
+    wrap.className = "output-block hint";
+
+    const line = document.createElement("div");
+    line.className = "help-line";
+
+    const t1 = document.createTextNode("Tapez ");
+    line.appendChild(t1);
+
+    const help = document.createElement("span");
+    help.className = "help-link";
+    help.dataset.cmd = "help";
+    help.textContent = "help";
+    line.appendChild(help);
+
+    line.appendChild(document.createTextNode(" ou "));
+
+    const q = document.createElement("span");
+    q.className = "help-link";
+    q.dataset.cmd = "?";
+    q.textContent = "?";
+    line.appendChild(q);
+
+    line.appendChild(document.createTextNode(" pour afficher les commandes. "));
+
+    const t2 = document.createTextNode("Ou ");
+    line.appendChild(t2);
+
+    const projects = document.createElement("span");
+    projects.className = "help-link";
+    projects.dataset.cmd = "projects";
+    projects.textContent = "projects";
+    line.appendChild(projects);
+
+    line.appendChild(document.createTextNode(" / "));
+
+    const contact = document.createElement("span");
+    contact.className = "help-link";
+    contact.dataset.cmd = "contact";
+    contact.textContent = "contact";
+    line.appendChild(contact);
+
+    line.appendChild(document.createTextNode("."));
+
+    wrap.appendChild(line);
+    el.history.appendChild(wrap);
+  }
+
   function scrollBottom() {
     window.scrollTo(0, document.body.scrollHeight);
   }
@@ -258,15 +307,30 @@
 
   function runAbout() {
     const text = `
-  Emile — Développeur
+  Emile Deballon — Développeur
 
-  Passionné par les systèmes, le web et l'UX.
-  Ce portfolio est un terminal : explore avec les commandes.
+  Avant de me diriger vers le développement et la data, j’ai travaillé comme consultant en fiscalité puis comme croupier poker. Ces expériences m’ont appris à analyser rapidement des situations complexes, à garder mon calme et à développer un vrai sens des relations humaines.
+
+J’ai obtenu les titres professionnels Développeur Web & Web Mobile et Concepteur Développeur d’Applications.
+Je poursuis aujourd’hui mon parcours avec un Master Expert IA & Data Science à l’EPSI de Lille. 
+
+Je suis actuellement à la recherche d’une alternance (rythme 2 semaines entreprise / 1 semaine école).
+
+J’aime concevoir des systèmes fiables, propres et cohérents. J’ai déployé mon propre serveur Linux pour disposer d’un environnement de travail maîtrisé, et je progresse en autonomie sur Python et les fondamentaux de la data. Je travaille sur plusieurs projets professionnels, dont une application complète de gestion de compétitions de pêche mêlant API Symfony, Next.js et React Native.
+
+En dehors du code, je cultive deux passions : l’observation astronomique et les plantes. Elles m’apprennent la patience, la précision et l’attention aux détails — des qualités que je retrouve dans mon travail de développeur.
+
+Mon mantra, attribué à Oscar Wilde, guide ma progression :
+« Je vise la lune, et même si je manque ma trajectoire, je retombe parmi les étoiles. »
+
+Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — lentement, sûrement, inarrêtable.
+
 
   Tapez 'projects' pour voir ce que je fais.
   Tapez 'contact' pour me joindre.
 `.trim();
     appendBlock(text);
+    appendGuide();
   }
 
   function runProjects(detail) {
@@ -315,6 +379,7 @@
 
       wrap.appendChild(list);
       el.history.appendChild(wrap);
+      appendGuide();
       return;
     }
     const proj = PROJECTS.find((p) => p.name.toLowerCase() === detail.toLowerCase());
@@ -328,6 +393,7 @@
         return;
       }
       appendBlock(`\n  ${proj.name}\n  ${proj.desc}\n\n  (Contenu à personnaliser.)\n`);
+      appendGuide();
     } else {
       appendBlock(`cat: ${detail}: fichier ou projet inconnu.`, "output-block error");
       appendBlock("Essayez: projects", "output-block hint");
@@ -384,6 +450,7 @@
 `;
     const block = appendBlock("", "output-block project-output");
     block.innerHTML = html;
+    appendGuide();
   }
 
   function runProjectSTF() {
@@ -484,6 +551,7 @@
 `;
     const block = appendBlock("", "output-block project-output");
     block.innerHTML = html;
+    appendGuide();
   }
 
   function runSkills() {
@@ -527,6 +595,7 @@
 `;
     const block = appendBlock("", "output-block project-output");
     block.innerHTML = html;
+    appendGuide();
   }
 
   function runContact() {
@@ -537,6 +606,7 @@
 `;
     const block = appendBlock("", "output-block");
     block.innerHTML = html;
+    appendGuide();
   }
 
   function runClear() {
