@@ -26,7 +26,7 @@
   const PROJECTS = [
     { name: "portfolio-terminal", desc: "Ce site (terminal en JS)" },
     { name: "stf", desc: "Plateforme web et mobile pour organiser des compétitions de pêche urbaine." },
-    { name: "autre-projet", desc: "Description à personnaliser" },
+    { name: "autre-projet", desc: "Page en cours de développement" },
   ];
 
   const COMMANDS = {
@@ -154,11 +154,44 @@
     const fragment = document.createDocumentFragment();
     BOOT_LINES.forEach((line) => {
       const div = document.createElement("div");
-      div.textContent = line;
+      if (line.includes("'help'") && line.includes("'?'")) {
+        // "Tapez 'help' ou '?' ..." avec liens cliquables
+        const before = "Tapez '";
+        const middle = "' ou '";
+        const after = "' pour afficher les commandes.";
+
+        div.appendChild(document.createTextNode(before));
+
+        const help = document.createElement("span");
+        help.className = "help-link";
+        help.dataset.cmd = "help";
+        help.textContent = "help";
+        div.appendChild(help);
+
+        div.appendChild(document.createTextNode(middle));
+
+        const q = document.createElement("span");
+        q.className = "help-link";
+        q.dataset.cmd = "?";
+        q.textContent = "?";
+        div.appendChild(q);
+
+        div.appendChild(document.createTextNode(after));
+      } else {
+        div.textContent = line;
+      }
       div.id = "line-boot";
       fragment.appendChild(div);
     });
     el.boot.appendChild(fragment);
+    // Délégation de clic sur les liens du boot
+    el.boot.addEventListener("click", function (e) {
+      const elLink = e.target && e.target.closest ? e.target.closest(".help-link") : null;
+      if (!elLink) return;
+      const cmd = elLink.dataset.cmd || "";
+      if (!cmd) return;
+      commitLineAndRun(cmd);
+    });
     scrollBottom();
   }
 
@@ -183,7 +216,9 @@
 
       const cmd = document.createElement("span");
       cmd.className = "help-link";
-      cmd.dataset.cmd = `${name}${args ? " " + args : ""}`.trim();
+      const displayCmd = `${name}${args ? " " + args : ""}`.trim();
+      const execCmd = (args && args.includes("[") && args.includes("]")) ? name : displayCmd;
+      cmd.dataset.cmd = execCmd;
       cmd.textContent = `${name}${args ? " " + args : ""}`.trim();
       line.appendChild(cmd);
 
@@ -236,9 +271,50 @@
 
   function runProjects(detail) {
     if (!detail) {
-      let out = "Projets:\n\n";
-      PROJECTS.forEach((p) => { out += `  ${p.name}\n    ${p.desc}\n\n`; });
-      appendBlock(out);
+      const wrap = document.createElement("div");
+      wrap.className = "output-block project-output";
+
+      const title = document.createElement("div");
+      title.className = "help-title";
+      title.textContent = "Projets";
+      wrap.appendChild(title);
+
+      const list = document.createElement("div");
+      list.className = "help-list";
+
+      PROJECTS.forEach((p) => {
+        const item = document.createElement("div");
+        item.className = "help-item";
+
+        const line = document.createElement("div");
+        line.className = "help-line";
+
+        const name = document.createElement("span");
+        name.className = "help-link";
+        name.dataset.cmd = p.name === "portfolio-terminal" ? "portfolio" : p.name;
+        name.textContent = p.name === "portfolio-terminal" ? "portfolio" : p.name;
+        line.appendChild(name);
+
+        item.appendChild(line);
+
+        const sub = document.createElement("div");
+        sub.className = "help-sub";
+        sub.textContent = p.desc;
+        item.appendChild(sub);
+
+        list.appendChild(item);
+      });
+
+      list.addEventListener("click", function (e) {
+        const el = e.target && e.target.closest ? e.target.closest(".help-link") : null;
+        if (!el) return;
+        const cmd = el.dataset.cmd || "";
+        if (!cmd) return;
+        commitLineAndRun(cmd);
+      });
+
+      wrap.appendChild(list);
+      el.history.appendChild(wrap);
       return;
     }
     const proj = PROJECTS.find((p) => p.name.toLowerCase() === detail.toLowerCase());
@@ -445,7 +521,7 @@
       <li>DevOps : Docker, nginx, Docker Compose</li>
       <li>Data/IA : notions ML (en consolidation)</li>
     </ul>
-    <div class="project-note">Si tu veux, je peux détailler cette section avec des niveaux et des exemples de projets.</div>
+    
   </div>
 </div>
 `;
