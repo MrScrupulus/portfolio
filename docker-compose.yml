@@ -9,3 +9,10 @@ services:
   backend:
     build: ./backend
     # Pas exposé sur l'hôte : nginx y accède via le réseau Docker (port 8000)
+    environment:
+      # Sécurité (CORS) : liste d'origines autorisées, séparées par des virgules
+      # Adapte/ajoute ton domaine public si besoin (ngrok, domaine perso, etc.)
+      - ALLOWED_ORIGINS=http://localhost:3036,https://emile-portfolio.ngrok.io
+      # Anti-spam pour /api/contact
+      - CONTACT_RATE_WINDOW_S=60
+      - CONTACT_RATE_MAX=10

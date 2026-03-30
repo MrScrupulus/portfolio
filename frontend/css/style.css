@@ -184,6 +184,119 @@ html[data-theme="matrix"] .cmd-line {
   color: var(--fg);
 }
 
+.output-block.project-output {
+  white-space: normal;
+}
+
+.project-card {
+  border: 1px solid var(--dim);
+  padding: 0.9rem 0.9rem 0.8rem;
+  margin: 0.25rem 0 1rem;
+  background: color-mix(in oklab, var(--bg) 88%, var(--accent) 12%);
+}
+
+.project-title {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+  letter-spacing: 0.2px;
+}
+
+.project-lead {
+  margin: 0.1rem 0 0.45rem;
+  color: var(--fg);
+}
+
+.project-stack {
+  margin: 0.1rem 0 0.65rem;
+  color: var(--dim);
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--dim);
+  color: var(--fg);
+  font-size: 0.9em;
+  line-height: 1.2;
+}
+
+.project-section {
+  margin: 0.9rem 0 0.85rem;
+}
+
+.project-h {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 0.35rem;
+}
+
+.project-p {
+  margin: 0;
+  color: var(--fg);
+}
+
+.project-list {
+  margin: 0.25rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.project-list li {
+  margin: 0.15rem 0;
+}
+
+.project-note {
+  margin-top: 0.4rem;
+  color: var(--dim);
+}
+
+/* CV preview (PDF embarqué) */
+.cv-preview-wrap {
+  width: 100%;
+  margin: 0.15rem 0 0.65rem;
+}
+
+.cv-preview {
+  display: block;
+  width: 100%;
+  height: 340px;
+  border: 1px solid var(--dim);
+  background: #fff;
+  border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+  .cv-preview {
+    height: 250px;
+  }
+}
+
+.qr-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.qr {
+  width: 180px;
+  max-width: 70vw;
+  height: auto;
+  border: 1px solid var(--dim);
+  background: #fff;
+}
+
+.qr-caption {
+  color: var(--fg);
+}
+
 .output-block a {
   color: var(--accent);
   text-decoration: none;
@@ -211,6 +324,48 @@ html[data-theme="matrix"] .cmd-line {
 .output-block.help-output {
   line-height: 1.2;
   margin: 0.35rem 0 0.5rem;
+}
+
+.help-title {
+  color: var(--accent);
+  font-weight: 600;
+  margin: 0 0 0.6rem;
+}
+
+.help-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.help-item {
+  display: block;
+}
+
+.help-line {
+  display: block;
+}
+
+.help-link {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.help-link:hover {
+  text-decoration: underline;
+}
+
+.help-sub {
+  color: var(--dim);
+  margin-left: 2ch;
+  margin-top: -0.05rem;
+  margin-bottom: 0;
+}
+
+.help-alias {
+  margin-top: 0.7rem;
+  color: var(--dim);
+  font-size: 0.95em;
 }
 
 #history .line {

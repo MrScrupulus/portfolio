@@ -7,15 +7,35 @@
     return "emile-portfolio@localhost:~$";
   }
   const THEMES = ["matrix", "amber", "blue"];
-  const ALIASES = { a: "about", p: "projects", h: "help", c: "contact", s: "skills", cl: "clear", t: "theme", e: "exit", "?": "help" };
+  const ALIASES = {
+    a: "about",
+    p: "projects",
+    portfolio: "portfolio-terminal",
+    h: "help",
+    c: "contact",
+    s: "skills",
+    cv: "skills",
+    "cv&skills": "skills",
+    "cv-skills": "skills",
+    cl: "clear",
+    t: "theme",
+    e: "exit",
+    "?": "help",
+  };
+
+  const PROJECTS = [
+    { name: "portfolio-terminal", desc: "Ce site (terminal en JS)" },
+    { name: "stf", desc: "Plateforme web et mobile pour organiser des compétitions de pêche urbaine." },
+    { name: "autre-projet", desc: "Description à personnaliser" },
+  ];
 
   const COMMANDS = {
     help: { args: "", desc: "Afficher cette aide" },
     about: { args: "", desc: "Qui je suis" },
-    projects: { args: "[nom]", desc: "Liste des projets (ou détail)" },
-    skills: { args: "", desc: "Compétences" },
+    projects: { args: "[nom]", desc: "Liste des projets (ex: projects stf)" },
+    skills: { args: "", desc: "" },
     contact: { args: "", desc: "Me contacter" },
-    clear: { args: "", desc: "Effacer l'écran" },
+    clear: { args: "", desc: "Nettoyer l'écran" },
     theme: { args: "[matrix|amber|blue]", desc: "Changer le thème (matrix, amber, blue)" },
     exit: { args: "", desc: "Fermer le terminal" },
     history: { args: "", desc: "Historique des commandes" },
@@ -143,12 +163,62 @@
   }
 
   function runHelp() {
-    let out = "Commandes disponibles:\n\n";
+    const wrap = document.createElement("div");
+    wrap.className = "output-block help-output";
+
+    const title = document.createElement("div");
+    title.className = "help-title";
+    title.textContent = "Commandes disponibles";
+    wrap.appendChild(title);
+
+    const list = document.createElement("div");
+    list.className = "help-list";
+
     Object.entries(COMMANDS).forEach(([name, { args, desc }]) => {
-      out += `  ${name} ${args}\n    ${desc}\n`;
+      const item = document.createElement("div");
+      item.className = "help-item";
+
+      const line = document.createElement("div");
+      line.className = "help-line";
+
+      const cmd = document.createElement("span");
+      cmd.className = "help-link";
+      cmd.dataset.cmd = `${name}${args ? " " + args : ""}`.trim();
+      cmd.textContent = `${name}${args ? " " + args : ""}`.trim();
+      line.appendChild(cmd);
+
+      item.appendChild(line);
+
+      const subText =
+        name === "skills"
+          ? "CV & skills"
+          : ((desc && String(desc).trim()) ? desc : "");
+      if (subText) {
+        const sub = document.createElement("div");
+        sub.className = "help-sub";
+        sub.textContent = subText;
+        item.appendChild(sub);
+      }
+
+      list.appendChild(item);
     });
-    out += "\nAlias: a=about, p=projects, h=help, c=contact, s=skills, cl=clear, t=theme, e=exit";
-    appendBlock(out, "output-block help-output");
+
+    list.addEventListener("click", function (e) {
+      const el = e.target && e.target.closest ? e.target.closest(".help-link") : null;
+      if (!el) return;
+      const cmd = el.dataset.cmd || "";
+      if (!cmd) return;
+      commitLineAndRun(cmd);
+    });
+
+    wrap.appendChild(list);
+
+    const alias = document.createElement("div");
+    alias.className = "help-alias";
+    alias.textContent = "Alias: a=about, p=projects, h=help, c=contact, s=skills, cv=skills, portfolio=portfolio-terminal";
+    wrap.appendChild(alias);
+
+    el.history.appendChild(wrap);
   }
 
   function runAbout() {
@@ -165,18 +235,22 @@
   }
 
   function runProjects(detail) {
-    const list = [
-      { name: "portfolio-terminal", desc: "Ce site (terminal en JS)" },
-      { name: "autre-projet", desc: "Description à personnaliser" },
-    ];
     if (!detail) {
       let out = "Projets:\n\n";
-      list.forEach((p) => { out += `  ${p.name}\n    ${p.desc}\n\n`; });
+      PROJECTS.forEach((p) => { out += `  ${p.name}\n    ${p.desc}\n\n`; });
       appendBlock(out);
       return;
     }
-    const proj = list.find((p) => p.name.toLowerCase() === detail.toLowerCase());
+    const proj = PROJECTS.find((p) => p.name.toLowerCase() === detail.toLowerCase());
     if (proj) {
+      if (proj.name.toLowerCase() === "stf") {
+        runProjectSTF();
+        return;
+      }
+      if (proj.name.toLowerCase() === "portfolio-terminal") {
+        runProjectPortfolioTerminal();
+        return;
+      }
       appendBlock(`\n  ${proj.name}\n  ${proj.desc}\n\n  (Contenu à personnaliser.)\n`);
     } else {
       appendBlock(`cat: ${detail}: fichier ou projet inconnu.`, "output-block error");
@@ -184,13 +258,199 @@
     }
   }
 
+  function runProjectPortfolioTerminal() {
+    const short = "Portfolio Terminal — site personnel présenté comme un terminal interactif : commandes, thèmes, historique et affichage des projets.";
+    const stack = "Stack : HTML/CSS/JavaScript (frontend nginx), API FastAPI (backend) via Docker Compose, exposition possible via ngrok.";
+
+    const html = `
+<div class="project">
+  <div class="project-card">
+    <div class="project-title">Portfolio Terminal</div>
+    <div class="project-lead">${short}</div>
+    <div class="project-stack">${stack}</div>
+    <div class="project-tags">
+      <span class="tag">HTML</span>
+      <span class="tag">CSS</span>
+      <span class="tag">JavaScript</span>
+      <span class="tag">nginx</span>
+      <span class="tag">FastAPI</span>
+      <span class="tag">Docker</span>
+      <span class="tag">Docker Compose</span>
+      <span class="tag">ngrok</span>
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Contexte</div>
+    <div class="project-p">
+      L’objectif est de présenter mon portfolio de façon mémorable : un terminal “jouable” qui guide la navigation via des commandes simples
+      (<span class="label">help</span>, <span class="label">projects</span>, <span class="label">skills</span>…).
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Fonctionnalités</div>
+    <ul class="project-list">
+      <li>Terminal interactif : historique, autocomplétion, thèmes</li>
+      <li>Affichage des projets en cartes + pages détaillées</li>
+      <li>Assets servis par nginx (QR code, CV PDF)</li>
+      <li>Backend minimal (health/contact) pour extension future</li>
+    </ul>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Code</div>
+    <div class="project-p">
+      GitHub : <a href="https://github.com/MrScrupulus/portfolio" target="_blank" rel="noopener">github.com/MrScrupulus/portfolio</a>
+    </div>
+  </div>
+</div>
+`;
+    const block = appendBlock("", "output-block project-output");
+    block.innerHTML = html;
+  }
+
+  function runProjectSTF() {
+    const short = "STF (Street Fishing) — Plateforme web et mobile pour organiser des compétitions de pêche urbaine : inscriptions par équipes, déclaration de prises avec photo et position, périmètres de pêche, scores et bonus, espace organisateurs et validation des prises par le jury.";
+    const stack = "Stack : API Symfony (PHP), MariaDB, applications Next.js (dashboard) et React Native / Expo (terrain), conteneurisées avec Docker, tests de charge k6.";
+
+    const html = `
+<div class="project">
+  <div class="project-card">
+    <div class="project-title">STF (Street Fishing)</div>
+    <div class="project-lead">${short}</div>
+    <div class="project-stack">${stack}</div>
+    <div class="project-tags">
+      <span class="tag">Symfony</span>
+      <span class="tag">API REST</span>
+      <span class="tag">Doctrine</span>
+      <span class="tag">MariaDB</span>
+      <span class="tag">Next.js</span>
+      <span class="tag">React</span>
+      <span class="tag">React Native</span>
+      <span class="tag">Expo</span>
+      <span class="tag">Docker</span>
+      <span class="tag">JWT</span>
+      <span class="tag">Géolocalisation</span>
+      <span class="tag">Upload</span>
+      <span class="tag">k6</span>
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Contexte</div>
+    <div class="project-p">
+      STF est un écosystème applicatif pensé pour faciliter le déroulement des compétitions (participants, encadrement, jury) :
+      suivi des compétitions et des équipes, saisie terrain des prises, règles de scoring (espèces, quotas, bonus) et workflow de validation des déclarations.
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Côté participants (mobile)</div>
+    <ul class="project-list">
+      <li>Authentification sécurisée</li>
+      <li>Consultation des compétitions et des équipes</li>
+      <li>Déclaration de prises avec photo et géolocalisation</li>
+      <li>Vérification automatique du respect des zones autorisées</li>
+      <li>Historique personnel et profil</li>
+      <li>Parcours admin : validation des prises en attente</li>
+    </ul>
+    <div class="project-note">L’application terrain est développée en React Native / Expo, pensée pour être utilisable en conditions réelles.</div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Côté organisation (web)</div>
+    <ul class="project-list">
+      <li>Configuration des compétitions (dates, espèces, règles, périmètres sur carte)</li>
+      <li>Gestion des équipes et des participants</li>
+      <li>Tableaux de bord et statistiques</li>
+      <li>Outils d’administration et de validation</li>
+    </ul>
+    <div class="project-note">Le dashboard est développé en Next.js, avec une expérience fluide et réactive.</div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Backend & architecture</div>
+    <ul class="project-list">
+      <li>API REST en Symfony</li>
+      <li>Persistance via Doctrine / MariaDB</li>
+      <li>Stockage structuré des médias (photos) sur disque</li>
+      <li>Authentification JWT, rôles (participants / staff / jury)</li>
+      <li>Environnement Docker Compose (API, base, volumes uploads)</li>
+    </ul>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Qualité & performance</div>
+    <div class="project-p">
+      Scénarios de tests de charge k6 sur les parcours critiques (consultation, création de prises, statistiques) pour valider la stabilité sous charge.
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Positionnement honnête</div>
+    <div class="project-p">
+      La géolocalisation aide au respect du règlement, mais ne constitue pas une preuve absolue de présence (limites intrinsèques du GPS côté client).
+      L’outil structure les déclarations et fluidifie le travail du staff ; il ne remplace pas l’arbitrage humain.
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Démo mobile (Expo)</div>
+    <div class="qr-wrap">
+      <img class="qr" src="/assets/stf-expo-qr.png" alt="QR code STF (Expo)" loading="lazy" />
+      <div class="qr-caption">
+        Pour tester : installe l’application <strong>Expo Go</strong> sur ton téléphone, puis scanne le QR code.
+      </div>
+    </div>
+  </div>
+</div>
+`;
+    const block = appendBlock("", "output-block project-output");
+    block.innerHTML = html;
+  }
+
   function runSkills() {
-    const text = `
-  Langages : JavaScript, Python, (à compléter)
-  Outils    : Docker, Git, (à compléter)
-  En cours  : FastAPI, (à compléter)
-`.trim();
-    appendBlock(text);
+    const html = `
+<div class="project">
+  <div class="project-card">
+    <div class="project-title">CV & skills</div>
+    <div class="project-lead">Télécharge mon CV et retrouve un aperçu rapide de mes compétences.</div>
+    <div class="project-tags">
+      <span class="tag">Python</span>
+      <span class="tag">JavaScript</span>
+      <span class="tag">FastAPI</span>
+      <span class="tag">Docker</span>
+      <span class="tag">Git</span>
+      <span class="tag">Web</span>
+      <span class="tag">Data / IA</span>
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">CV</div>
+    <div class="cv-preview-wrap">
+      <iframe class="cv-preview" src="/assets/cv-emile-deballon.pdf#page=1&view=FitH" title="Aperçu du CV" loading="lazy"></iframe>
+    </div>
+    <div class="project-p">
+      <a class="cv-download" href="/assets/cv-emile-deballon.pdf" target="_blank" rel="noopener" download>Télécharger le CV (PDF)</a>
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Compétences </div>
+    <ul class="project-list">
+      <li>Backend : FastAPI, API REST</li>
+      <li>Frontend : HTML/CSS/JS</li>
+      <li>DevOps : Docker, nginx, Docker Compose</li>
+      <li>Data/IA : notions ML (en consolidation)</li>
+    </ul>
+    <div class="project-note">Si tu veux, je peux détailler cette section avec des niveaux et des exemples de projets.</div>
+  </div>
+</div>
+`;
+    const block = appendBlock("", "output-block project-output");
+    block.innerHTML = html;
   }
 
   function runContact() {
@@ -332,6 +592,10 @@
         runSudo();
         break;
       default:
+        if (PROJECTS.some((p) => p.name.toLowerCase() === cmd)) {
+          runProjects(cmd);
+          break;
+        }
         suggestUnknown(trimmed);
     }
 
