@@ -316,7 +316,7 @@
 J’ai obtenu les titres professionnels Développeur Web & Web Mobile et Concepteur Développeur d’Applications.
 Je poursuis aujourd’hui mon parcours avec un Master Expert IA & Data Science à l’EPSI de Lille. 
 
-Je suis actuellement à la recherche d’une alternance (rythme 2 semaines entreprise / 1 semaine école).
+Je suis à la recherche d’une alternance (rythme 2 semaines entreprise / 1 semaine école).
 
 J’aime concevoir des systèmes fiables, propres et cohérents. J’ai déployé mon propre serveur Linux pour disposer d’un environnement de travail maîtrisé, et je progresse en autonomie sur Python et les fondamentaux de la data. Je travaille sur plusieurs projets professionnels, dont une application complète de gestion de compétitions de pêche mêlant API Symfony, Next.js et React Native.
 
@@ -847,7 +847,8 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
       e.preventDefault();
       e.stopPropagation();
       commitLineAndRun(cmd);
-    }, true);
+      requestAnimationFrame(scrollBottom);
+    });
 
     if (el.inputArea) {
       el.inputArea.addEventListener("keydown", function (e) {
