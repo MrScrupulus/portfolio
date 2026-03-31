@@ -48,7 +48,12 @@
 
   const BOOT_LINES = [
     "Portfolio Terminal v1.0",
-    "Tapez 'help' ou '?' pour afficher les commandes.",
+    "",
+    "Bienvenue sur le Portfolio de Emile Deballon",
+    "Appréciez mon profil par une expérience immersive dans ce terminal simulé.",
+    "",
+    "Tapez 'help' ou '?' pour afficher les commandes",
+    "ou cliquez sur les commandes désirées.",
     "",
   ];
 
@@ -210,10 +215,11 @@
     BOOT_LINES.forEach((line) => {
       const div = document.createElement("div");
       if (line.includes("'help'") && line.includes("'?'")) {
-        // "Tapez 'help' ou '?' ..." avec liens cliquables
-        const before = "Tapez '";
-        const middle = "' ou '";
-        const after = "' pour afficher les commandes.";
+        // Rendre "Tapez 'help' ou '?' ..." cliquable en conservant le texte exact
+        const before = line.split("'help'")[0] + "'"; // inclut le premier '
+        const afterHelp = line.split("'help'")[1] || "";
+        const middle = (afterHelp.split("'?'")[0] || "") + "'"; // inclut le '
+        const after = (afterHelp.split("'?'")[1] || "");
 
         div.appendChild(document.createTextNode(before));
 
@@ -233,7 +239,11 @@
 
         div.appendChild(document.createTextNode(after));
       } else {
-        div.textContent = line;
+        // Une ligne vide n'a pas de hauteur : on force un espace insécable
+        div.textContent = (line === "") ? "\u00A0" : line;
+        if (line.trim().toLowerCase() === "ou cliquez sur les commandes désirées.") {
+          div.classList.add("boot-hint");
+        }
       }
       div.id = "line-boot";
       fragment.appendChild(div);

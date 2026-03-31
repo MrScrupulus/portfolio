@@ -397,6 +397,10 @@ html[data-theme="matrix"] .cmd-line {
   margin-top: 0.25rem;
 }
 
+.boot-hint {
+  color: var(--dim);
+}
+
 @media (max-width: 768px) {
   .boot-tip {
     display: block;
