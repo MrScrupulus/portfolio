@@ -25,7 +25,7 @@
 
   const PROJECTS = [
     { name: "portfolio-terminal", desc: "Ce site (terminal en JS)" },
-    { name: "stf", desc: "Plateforme web et mobile pour organiser des compétitions de pêche urbaine." },
+    { name: "stf", desc: "Écosystème web & mobile pour compétitions de pêche urbaine (inscriptions, scoring, photo+GPS, validation)." },
     { name: "autre-projet", desc: "Page en cours de développement" },
   ];
 
@@ -458,8 +458,10 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
   }
 
   function runProjectSTF() {
-    const short = "STF (Street Fishing) — Plateforme web et mobile pour organiser des compétitions de pêche urbaine : inscriptions par équipes, déclaration de prises avec photo et position, périmètres de pêche, scores et bonus, espace organisateurs et validation des prises par le jury.";
-    const stack = "Stack : API Symfony (PHP), MariaDB, applications Next.js (dashboard) et React Native / Expo (terrain), conteneurisées avec Docker, tests de charge k6.";
+    const short =
+      "STF (Street Fishing) — Écosystème web & mobile pour la gestion complète de compétitions de pêche urbaine : inscriptions, scoring automatisé, déclaration de prises (photo + GPS), périmètres géographiques, workflow de validation et outils organisateurs.";
+    const stack =
+      "Stack : API Symfony (PHP), MariaDB, Next.js (dashboard), React Native / Expo (terrain), Docker, tests de charge k6.";
 
     const html = `
 <div class="project">
@@ -474,6 +476,7 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
       <span class="tag">MariaDB</span>
       <span class="tag">Next.js</span>
       <span class="tag">React</span>
+      <span class="tag">React Query</span>
       <span class="tag">React Native</span>
       <span class="tag">Expo</span>
       <span class="tag">Docker</span>
@@ -487,58 +490,80 @@ Comme une plante qui perce la terre, je pousse, je persiste, je m’élève — 
   <div class="project-section">
     <div class="project-h">Contexte</div>
     <div class="project-p">
-      STF est un écosystème applicatif pensé pour faciliter le déroulement des compétitions (participants, encadrement, jury) :
-      suivi des compétitions et des équipes, saisie terrain des prises, règles de scoring (espèces, quotas, bonus) et workflow de validation des déclarations.
+      STF est un écosystème applicatif modulaire conçu pour orchestrer l’ensemble du cycle d’une compétition : gestion des entités métier (équipes, espèces, règles, périmètres), collecte terrain des données (photos, GPS), scoring automatisé et validation par le staff.
+      L’architecture repose sur une API REST centralisée, un dashboard web pour l’organisation et une application mobile optimisée pour les conditions réelles.
     </div>
   </div>
 
   <div class="project-section">
     <div class="project-h">Côté participants (mobile)</div>
     <ul class="project-list">
-      <li>Authentification sécurisée</li>
-      <li>Consultation des compétitions et des équipes</li>
-      <li>Déclaration de prises avec photo et géolocalisation</li>
-      <li>Vérification automatique du respect des zones autorisées</li>
-      <li>Historique personnel et profil</li>
-      <li>Parcours admin : validation des prises en attente</li>
+      <li>Authentification sécurisée (JWT)</li>
+      <li>Consultation des compétitions, équipes et règles</li>
+      <li>Déclaration de prises avec upload photo, géolocalisation et contrôles côté client</li>
+      <li>Vérification automatique du respect des zones autorisées (matching GPS / polygones)</li>
+      <li>Historique personnel, profil, suivi des prises</li>
+      <li>Parcours administrateur pour la validation des prises en attente</li>
     </ul>
-    <div class="project-note">L’application terrain est développée en React Native / Expo, pensée pour être utilisable en conditions réelles.</div>
+    <div class="project-note">Application développée en React Native / Expo, avec gestion fine des permissions, du cache et des formulaires dynamiques.</div>
   </div>
 
   <div class="project-section">
     <div class="project-h">Côté organisation (web)</div>
     <ul class="project-list">
-      <li>Configuration des compétitions (dates, espèces, règles, périmètres sur carte)</li>
-      <li>Gestion des équipes et des participants</li>
-      <li>Tableaux de bord et statistiques</li>
-      <li>Outils d’administration et de validation</li>
+      <li>Configuration complète des compétitions : calendrier, espèces, quotas, bonus, périmètres cartographiques</li>
+      <li>Gestion des équipes, participants et déclarations</li>
+      <li>Tableaux de bord (statistiques, heatmaps, scoring)</li>
+      <li>Outils d’administration (validation, corrections, exports)</li>
     </ul>
-    <div class="project-note">Le dashboard est développé en Next.js, avec une expérience fluide et réactive.</div>
+    <div class="project-note">Dashboard développé en Next.js, avec rendu hybride (SSR/CSR), React Query et composants UI optimisés.</div>
   </div>
 
   <div class="project-section">
     <div class="project-h">Backend & architecture</div>
     <ul class="project-list">
-      <li>API REST en Symfony</li>
-      <li>Persistance via Doctrine / MariaDB</li>
-      <li>Stockage structuré des médias (photos) sur disque</li>
-      <li>Authentification JWT, rôles (participants / staff / jury)</li>
-      <li>Environnement Docker Compose (API, base, volumes uploads)</li>
+      <li>API REST Symfony (architecture modulaire, services, DTO, validation serveur)</li>
+      <li>Persistance via Doctrine / MariaDB (relations, indexation, optimisations de requêtes)</li>
+      <li>Stockage structuré des médias (photos) sur disque : /uploads/{year}/{month}/{competition}/</li>
+      <li>Authentification JWT, gestion des rôles (participant / staff / jury)</li>
+      <li>Environnement Docker Compose (API, DB, volumes, reverse proxy optionnel)</li>
     </ul>
+    <div class="project-note">Architecture pensée pour être reproductible, portable et maintenable.</div>
   </div>
 
   <div class="project-section">
     <div class="project-h">Qualité & performance</div>
-    <div class="project-p">
-      Scénarios de tests de charge k6 sur les parcours critiques (consultation, création de prises, statistiques) pour valider la stabilité sous charge.
-    </div>
+    <div class="project-p">Tests de charge réalisés avec k6 sur les parcours critiques :</div>
+    <ul class="project-list">
+      <li>consultation des compétitions</li>
+      <li>création de prises (upload + GPS)</li>
+      <li>statistiques</li>
+    </ul>
+    <div class="project-note">Scénarios smoke + endurance, monitoring des temps de réponse, taux d’erreur nul sur les seuils définis.</div>
   </div>
 
   <div class="project-section">
     <div class="project-h">Positionnement honnête</div>
     <div class="project-p">
-      La géolocalisation aide au respect du règlement, mais ne constitue pas une preuve absolue de présence (limites intrinsèques du GPS côté client).
-      L’outil structure les déclarations et fluidifie le travail du staff ; il ne remplace pas l’arbitrage humain.
+      La géolocalisation est utilisée comme aide au respect du règlement, mais ne constitue pas une preuve absolue (variabilité GPS côté client).
+      L’outil structure les données, fluidifie le travail du staff et améliore la transparence, mais ne remplace pas l’arbitrage humain.
+    </div>
+  </div>
+
+  <div class="project-section">
+    <div class="project-h">Améliorations futures (IA)</div>
+    <div class="project-p">Étude d’un module de ré-identification visuelle des brochets via Deep Learning.</div>
+    <div class="project-p">Approche envisagée :</div>
+    <ul class="project-list">
+      <li>extraction d’embeddings (signatures vectorielles) depuis les photos via un modèle pré-entraîné (MobileNet / EfficientNet)</li>
+      <li>matching par similarité (cosine / euclidienne) pour détecter les individus déjà observés</li>
+      <li>analyse spatio-temporelle des observations (GPS + date) pour étudier déplacements, territoires et comportements</li>
+    </ul>
+    <div class="project-p">
+      Ce module pourrait servir à la fois à la détection de doublons et à des usages scientifiques (traçabilité, migration, recaptures).
+    </div>
+    <div class="project-note">
+      Les photos étant prises sur une toise, flanc visible, un recadrage automatique et un contrôle qualité sont envisageables. La validation finale reste humaine.
     </div>
   </div>
 
